@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from models.user import User as UserModel
 from config import db
 # from controllers.user import User as userService
+from fastapi.encoders import jsonable_encoder
 from bson import ObjectId
 
 router = APIRouter()
@@ -30,7 +31,16 @@ async def getUserDetail(id:str):
         raise HTTPException(status_code=500, detail="Error retrieving user")
 
 
-# @router.put('/{id}')
-# async def updateUser(id:str):
-#     try:
-#         result = await collection.update_one({"id":ObjectId(id)})
+@router.put('user/{id}')
+async def updateUser(id:str, update_data:UserModel):
+    try:
+        # json_compatible_user_data = jsonable_encoder(update_data)
+        # collection[id] = json_compatible_user_data
+        result = await collection.update_one({"_id":ObjectId(id)},{"$set": jsonable_encoder(update_data)})
+        if result.modified_count == 1:
+            return {"message": "User updated successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="User not found or not updated")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error updating user")
+

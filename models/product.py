@@ -2,9 +2,9 @@ from typing import List
 from pydantic import BaseModel
 
 class Size(BaseModel):
-    length: int
-    breadth: int
-    height: int
+    length: str
+    breadth: str
+    height: str
 
 class Review(BaseModel):
     title: str
