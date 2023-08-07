@@ -16,7 +16,7 @@ class Address(BaseModel):
     country: str
 
 
-class User(BaseExceptionGroup):
+class User(BaseModel):
     name: List[Name]
     address: List[Address]
     mobile: int
