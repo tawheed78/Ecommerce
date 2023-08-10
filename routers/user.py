@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from models.user import User as UserModel
+from models.orders import Order as OrderModel
+from models.addtocart import Add_to_Cart as AddToCartModel
 from config import db
 # from controllers.user import User as userService
 from fastapi.encoders import jsonable_encoder
@@ -44,3 +46,60 @@ async def updateUser(id:str, update_data:UserModel):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error updating user")
 
+
+@router.post('/add-to-cart/')
+async def addToCart(cart:AddToCartModel, id:str):
+    try: 
+        response = await collection.update_one({"_id":ObjectId(id)}, {"$push":{"cart": ObjectId(cart.prodId)}})
+        print(response)
+        return {"message":"Product added succesfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error updating cart")
+    
+
+@router.get('cart-details/{id}')
+async def getUserCart(id:str):
+    try:
+        response = await collection.aggregate([
+            {"$match": {"_id": ObjectId(id)}},
+            {"$lookup": {
+                "from": 'products',
+                "localField": "cart",
+                "foreignField": "_id",
+                "as": "cart_details"
+            }},
+            {"$project": {"cart_details": 1, "_id": 0}}
+        ])
+        
+        cart_list = []
+        async for item in response:
+            for document in item['cart_details']:
+                document['_id'] = str(document['_id'])
+                cart_list.append(document)
+        return cart_list
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error updating cart")
+    # try:
+    #     response = await collection.find_one({"_id":ObjectId(id)})
+    #     if response:
+    #         # cart_detail = response['cart']
+    #         cart_list = []
+    #         async for item in response:
+    #             for document in item['cart']:
+    #                 document['_id'] = str(document['_id'])
+    #                 cart_list.append(document)
+    #         print(cart_list)
+    #         return cart_list
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail="Error updating cart")
+
+
+@router.delete('delete-cart')
+async def delFromCart(id:str, product):
+    try:
+        response = await collection.update_one({"_id": ObjectId(id)}, {"$pull": {'cart': ObjectId(product)}})
+        return {"message":"Product removed succesfully"}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error updating cart")

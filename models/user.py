@@ -23,3 +23,5 @@ class User(BaseModel):
     dob: str
     gender: str
     email: str
+    cart: list[str] | None=None
+    prevOrder: list[str]

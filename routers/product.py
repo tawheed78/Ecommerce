@@ -55,3 +55,16 @@ async def updateProduct(id:str, update_data:ProductModel):
             raise HTTPException(status_code=404, detail="Product not found or not updated")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error updating Product")
+    
+
+@router.delete('product/{id}/')
+async def deleteProduct(id:str):
+    try:
+        result = await collection.find_one({"_id":ObjectId(id)})
+        if result:
+            collection.delete_one({"_id":ObjectId(id)})
+            return {"message": "Product deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Product not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error deleting Product")
