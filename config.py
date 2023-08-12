@@ -1,6 +1,10 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+import os
 
-client = AsyncIOMotorClient("mongodb+srv://tawheed:xTHlamoaGlPhFZGq@cluster0.izcnild.mongodb.net/?retryWrites=true&w=majority")
+load_dotenv()
+
+client = AsyncIOMotorClient(os.getenv("MONGO_URI"))
 
 if client:
     print("******MongoDB connection successful.******")

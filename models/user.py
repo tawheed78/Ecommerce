@@ -24,4 +24,4 @@ class User(BaseModel):
     gender: str
     email: str
     cart: list[str] | None=None
-    prevOrder: list[str]
+    prevOrder: list[str] | None = None
