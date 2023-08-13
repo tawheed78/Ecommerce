@@ -27,6 +27,6 @@ class Product(BaseModel):
     mfg_date: str
     is_returnable: bool
     is_available: bool
-    avail_qunatity: int
+    avail_quantity: int
     
 
