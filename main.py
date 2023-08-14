@@ -6,8 +6,8 @@ from routers.orders import router as orderRouter
 
 app = FastAPI()
 
-app.include_router(userRouter, prefix="/users")
+app.include_router(userRouter)
 
-app.include_router(productRouter, prefix="/products")
+app.include_router(productRouter)
 
-app.include_router(orderRouter, prefix="/orders")
+app.include_router(orderRouter)

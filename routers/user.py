@@ -11,7 +11,7 @@ from services import host,port,password,r,json
 router = APIRouter()
 collection = db["users"]
 
-@router.post('/add')
+@router.post('/add-user')
 async def addUser(user:UserModel):
     try:
         user = user.model_dump()
@@ -20,7 +20,7 @@ async def addUser(user:UserModel):
         print(e)
     return {"message": "User created successfully "}
 
-@router.get('/{id}')
+@router.get('/user/{id}')
 async def getUserDetail(id:str):
     try:
         cached_response = r.get(f'user_detail:{id}')
@@ -40,7 +40,7 @@ async def getUserDetail(id:str):
         raise HTTPException(status_code=500, detail="Error retrieving user")
 
 
-@router.put('user/{id}')
+@router.put('/update-user/{id}')
 async def updateUser(id:str, update_data:UserModel):
     try:
         result = await collection.update_one({"_id":ObjectId(id)},{"$set": jsonable_encoder(update_data)})
@@ -62,7 +62,7 @@ async def addToCart(cart:AddToCartModel, id:str):
         raise HTTPException(status_code=500, detail="Error updating cart")
     
 
-@router.get('cart-details/{id}')
+@router.get('/user-cart-details/{id}')
 async def getUserCart(id:str):
     try:
         cached_response = r.get(f'cart_products:{id}')
@@ -92,7 +92,7 @@ async def getUserCart(id:str):
         raise HTTPException(status_code=500, detail="Error updating cart")
 
 
-@router.delete('delete-cart')
+@router.delete('/delete-user-cart')
 async def delFromCart(id:str, product):
     try:
         response = await collection.update_one({"_id": ObjectId(id)}, {"$pull": {'cart': ObjectId(product)}})

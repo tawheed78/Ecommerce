@@ -7,16 +7,6 @@ from bson import ObjectId
 import redis, json
 from services import host,password,port,json,r
 
-# load_dotenv()
-
-# host = os.getenv("HOST")
-# port = os.getenv("PORT")
-# password = os.getenv("PASSWORD")
-
-# r = redis.Redis(
-#   host=host,
-#   port=port,
-#   password=password)
 
 try:
     response = r.ping()
@@ -35,27 +25,13 @@ async def createProduct(product:ProductModel):
     try:
         product_dict = jsonable_encoder(product)
         response = await collection.insert_one(product_dict)
-        # return response
+        
     except Exception as e:
         print(e)
     return {"message": "Product created successfully "}
 
-# @router.get('/products/')
-# async def getAllProducts():
-#     try:
-#         products = await collection.find({}).to_list(length=10)
-#         prod_list = []
-#         for item in products:
-#             item['title'] = str(item['title'])
-#             prod_list.append(item['title'])
-#         if prod_list:
-#             return prod_list
-#         else:
-#             raise HTTPException(status_code=500, detail="No products found")
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail="Error retrieving products")
     
-@router.get('/products/')
+@router.get('/all-products/')
 async def getAllProducts():
     try:
         cached_response =  r.get('products_list')
@@ -76,7 +52,7 @@ async def getAllProducts():
         raise HTTPException(status_code=500, detail="Error retrieving products")
     
 
-@router.get('/product/{id}')
+@router.get('/product-detail/{id}')
 async def getProduct(id:str):
     try:
         cached_response = r.get('product')
@@ -94,7 +70,7 @@ async def getProduct(id:str):
         raise HTTPException(status_code=500, detail="Error retrieving products")
     
 
-@router.put('product/{id}')
+@router.put('/update-product/{id}')
 async def updateProduct(id:str, update_data:ProductModel):
     try:
         result = await collection.update_one({"_id":ObjectId(id)},{"$set": jsonable_encoder(update_data)})
@@ -106,7 +82,7 @@ async def updateProduct(id:str, update_data:ProductModel):
         raise HTTPException(status_code=500, detail="Error updating Product")
     
 
-@router.delete('product/{id}/')
+@router.delete('delete-product/{id}/')
 async def deleteProduct(id:str):
     try:
         result = await collection.find_one({"_id":ObjectId(id)})

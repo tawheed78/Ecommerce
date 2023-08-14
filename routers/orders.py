@@ -18,9 +18,12 @@ async def placeOrder(id:str):
     try:
         order = await collection.aggregate([
             {"$match": {"_id": ObjectId(id)}},
-            {"$project":{"cart":1,"_id":0}}
+            {"$project":{"cart":1,"address":1,"mobile":1,"_id":0}}
         ]).to_list(length=None)
 
+        address = order[0].get('address',[])
+        mobile = order[0].get('mobile',[])
+        
         cart_item_ids = order[0].get('cart', [])
 
         order_total = 0
@@ -35,6 +38,8 @@ async def placeOrder(id:str):
         order_document = {
             "user_id" : id,
             "items" : cart_item_ids,
+            "address" : address,
+            "mobile": mobile,
             "order_total": order_total,
             "order_date": {"$currentDate": True}
         }
@@ -47,7 +52,7 @@ async def placeOrder(id:str):
         raise HTTPException(status_code=500, detail="Error placing order")
     
 
-@router.get('orders/{id}')
+@router.get('/user-orders/{id}')
 async def getUserOrders(user_id:str):
     try:
         response = await db.orders.aggregate([
@@ -66,7 +71,7 @@ async def getUserOrders(user_id:str):
             item['items'] = [str(itm) for itm in item['items']]
 
             order_list.append(item)
-            
+
         return order_list
     
     except Exception as e:
