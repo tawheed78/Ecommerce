@@ -1,11 +1,17 @@
+
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from models.orders import Order as OrderModel
 from config import db
 from fastapi.encoders import jsonable_encoder
-from bson import ObjectId, Timestamp
+import json
+from bson import ObjectId
+
 
 router = APIRouter()
 collection = db["users"]
+
 
 @router.post('/place-order/')
 async def placeOrder(id:str):
@@ -32,10 +38,38 @@ async def placeOrder(id:str):
             "order_total": order_total,
             "order_date": {"$currentDate": True}
         }
-        order_place = db.orders.insert_one(order_document)
+        db.orders.insert_one(order_document)
 
         return {"message": "Order placed successfully"}
 
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Error placing order")
+    
+
+@router.get('orders/{id}')
+async def getUserOrders(user_id:str):
+    try:
+        response = await db.orders.aggregate([
+            {"$match": {"user_id": user_id}},
+            {"$project": { "_id": 1}}
+        ]).to_list(length=None)
+    
+        order_item_ids = [order['_id'] for order in response]
+       
+        order_list = []
+        for item_id in order_item_ids:
+            item = await db.orders.find_one({"_id": ObjectId(item_id)})
+
+            item['_id'] = str(item['_id'])
+            item['user_id'] = str(item['user_id'])
+            item['items'] = [str(itm) for itm in item['items']]
+
+            order_list.append(item)
+            
+        return order_list
+    
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Error retrieving previous orders")    
+ 
