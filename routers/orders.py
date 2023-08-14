@@ -7,6 +7,7 @@ from config import db
 from fastapi.encoders import jsonable_encoder
 import json
 from bson import ObjectId
+from services import sqs,queue_url
 
 
 router = APIRouter()
@@ -45,7 +46,18 @@ async def placeOrder(id:str):
         }
         db.orders.insert_one(order_document)
 
-        return {"message": "Order placed successfully"}
+        message = {
+            'user_id': str(id),
+            'items': str(cart_item_ids),
+            'address':str(address),
+            'order_total': order_total
+        }
+        response = sqs.send_message(
+            QueueUrl=queue_url,
+            MessageBody=(json.dumps(message))
+        )
+
+        return {"message": "Order placed successfully","sqs_response": response}
 
     except Exception as e:
         print(e)
