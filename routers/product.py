@@ -31,7 +31,7 @@ async def createProduct(product:ProductModel):
     return {"message": "Product created successfully "}
 
     
-@router.get('/all-products/')
+@router.get('/products/')
 async def getAllProducts():
     try:
         cached_response =  r.get('products_list')

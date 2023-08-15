@@ -64,7 +64,7 @@ async def placeOrder(id:str):
         raise HTTPException(status_code=500, detail="Error placing order")
     
 
-@router.get('/user-orders/{id}')
+@router.get('/orders/{id}')
 async def getUserOrders(user_id:str):
     try:
         response = await db.orders.aggregate([
